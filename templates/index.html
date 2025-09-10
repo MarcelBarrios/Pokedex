@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Pokedex - Home{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-4xl font-bold text-gray-800">Pokédex</h1>
+    </div>
+
+    {% if search_term %}
+    <p class="mb-6 text-xl text-gray-700">Showing results for: <strong class="text-red-600">{{ search_term }}</strong>
+    </p>
+    {% endif %}
+
+    {% if pokemons.items %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        {% for pokemon in pokemons.items %}
+        <a href="{{ url_for('main.pokemon_detail', pokemon_id=pokemon.id) }}"
+            class="pokemon-card block p-4 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 ease-in-out bg-white">
+            {% if pokemon.sprite_url %}
+            <img src="{{ pokemon.sprite_url }}" alt="{{ pokemon.name.capitalize() }}"
+                class="mx-auto h-32 w-32 object-contain">
+            {% else %}
+            <div class="mx-auto h-32 w-32 flex items-center justify-center bg-gray-200 rounded">
+                <span class="text-gray-500">No Image</span>
+            </div>
+            {% endif %}
+            <h2 class="text-xl font-semibold text-center mt-4 text-gray-800">{{ pokemon.name.capitalize() }}</h2>
+            <p class="text-sm text-gray-500 text-center">#{{ "%03d" | format(pokemon.id) }}</p>
+            <div class="mt-2 text-center">
+                <span class="type-badge type-{{ pokemon.type1.lower() }}">{{ pokemon.type1 }}</span>
+                {% if pokemon.type2 %}
+                <span class="type-badge type-{{ pokemon.type2.lower() }} ml-1">{{ pokemon.type2 }}</span>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <nav class="mt-10" aria-label="Pokedex navigation">
+        <ul class="flex justify-center items-center -space-x-px">
+            {% if pokemons.has_prev %}
+            <li>
+                <a href="{{ url_for('main.index', page=pokemons.prev_num, search_term=search_term) }}"
+                    class="py-2 px-3 ml-0 leading-tight text-gray-500 bg-white rounded-l-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700">Previous</a>
+            </li>
+            {% else %}
+            <li>
+                <span
+                    class="py-2 px-3 ml-0 leading-tight text-gray-300 bg-white rounded-l-lg border border-gray-300 cursor-not-allowed">Previous</span>
+            </li>
+            {% endif %}
+
+            {% for page_num in pokemons.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+            {% if page_num %}
+            {% if pokemons.page == page_num %}
+            <li>
+                <span aria-current="page"
+                    class="py-2 px-3 text-blue-600 bg-blue-50 border border-gray-300 hover:bg-blue-100 hover:text-blue-700 z-10">{{
+                    page_num }}</span>
+            </li>
+            {% else %}
+            <li>
+                <a href="{{ url_for('main.index', page=page_num, search_term=search_term) }}"
+                    class="py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700">{{
+                    page_num }}</a>
+            </li>
+            {% endif %}
+            {% else %}
+            <li><span class="py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300">...</span></li>
+            {% endif %}
+            {% endfor %}
+
+            {% if pokemons.has_next %}
+            <li>
+                <a href="{{ url_for('main.index', page=pokemons.next_num, search_term=search_term) }}"
+                    class="py-2 px-3 leading-tight text-gray-500 bg-white rounded-r-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700">Next</a>
+            </li>
+            {% else %}
+            <li>
+                <span
+                    class="py-2 px-3 leading-tight text-gray-300 bg-white rounded-r-lg border border-gray-300 cursor-not-allowed">Next</span>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% else %}
+    {% if search_term %}
+    <p class="text-center text-gray-600 text-xl mt-10">No Pokémon found matching your search for "{{ search_term }}".
+    </p>
+    {% else %}
+    <p class="text-center text-gray-600 text-xl mt-10">No Pokémon found in the database. Try running the seed command:
+        <code class="bg-gray-200 p-1 rounded">flask seed-db</code></p>
+    {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

@@ -6,3 +6,6 @@ Flask-Bcrypt
 python-dotenv
 requests
 gunicorn
+pytest
+pytest-flask
+email_validator

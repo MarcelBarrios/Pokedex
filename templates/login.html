@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% from "_form_helpers.html" import render_field %} {# We'll create this helper next #}
+
+{% block title %}Login - Pokedex{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-12 bg-white p-8 rounded-lg shadow-xl">
+    <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Login to Pokédex</h2>
+    <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) }}" novalidate>
+        {{ form.hidden_tag() }} {# CSRF token #}
+
+        <div class="mb-4">
+            {{ render_field(form.identifier, class="w-full px-4 py-2 border border-gray-300 rounded-lg
+            focus:ring-blue-500 focus:border-blue-500", placeholder="Username or Email") }}
+        </div>
+
+        <div class="mb-6">
+            {{ render_field(form.password, class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500
+            focus:border-blue-500", placeholder="Password") }}
+        </div>
+
+        {# Add Remember Me checkbox if desired in LoginForm and here #}
+        {# <div class="mb-6 flex items-center">
+            {{ form.remember_me(class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded") }}
+            {{ form.remember_me.label(class="ml-2 block text-sm text-gray-900") }}
+        </div> #}
+
+        <div>
+            {{ form.submit(class="w-full btn-pokedex font-semibold py-2 px-4 rounded-lg hover:bg-blue-700
+            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150
+            ease-in-out") }}
+        </div>
+    </form>
+    <p class="mt-6 text-center text-sm text-gray-600">
+        Don't have an account?
+        <a href="{{ url_for('auth.signup') }}" class="font-medium text-blue-600 hover:text-blue-500">
+            Sign up here
+        </a>
+    </p>
+    {# Add forgot password link if desired #}
+    {# <p class="mt-2 text-center text-sm">
+        <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Forgot your password?</a>
+    </p> #}
+</div>
+{% endblock %}

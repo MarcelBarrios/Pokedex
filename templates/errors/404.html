@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found - Pokedex{% endblock %}
+
+{% block content %}
+<div class="container mx-auto mt-20 text-center">
+    <img src="https://http.cat/404" alt="404 Not Found" class="mx-auto mb-8 rounded shadow-lg"
+        style="max-width: 400px;">
+    <h1 class="text-6xl font-bold text-red-600">404</h1>
+    <h2 class="text-3xl font-semibold text-gray-700 mt-4 mb-2">Oops! Page Not Found.</h2>
+    <p class="text-lg text-gray-600 mb-8">
+        Sorry, the page you are looking for might have been removed, had its name changed, or is temporarily
+        unavailable.
+    </p>
+    <a href="{{ url_for('main.index') }}"
+        class="btn-pokedex px-8 py-3 text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+        Go to Homepage
+    </a>
+</div>
+{% endblock %}

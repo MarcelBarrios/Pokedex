@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Pokedex{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Inspired by pokemon.com Pokedex color scheme */
+        body {
+            background-color: #f0f0f0;
+            /* Light grey background */
+        }
+
+        .pokedex-header {
+            background-color: #d92328;
+            /* Pokemon Red */
+            color: white;
+        }
+
+        .pokedex-footer {
+            background-color: #333;
+            color: #ccc;
+        }
+
+        .pokemon-card {
+            background-color: white;
+            border: 1px solid #dedede;
+            border-radius: 8px;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .pokemon-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 0.25em 0.6em;
+            font-size: 0.75em;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.25rem;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        /* Type specific colors - add more as needed */
+        .type-normal {
+            background-color: #A8A77A;
+        }
+
+        .type-fire {
+            background-color: #EE8130;
+        }
+
+        .type-water {
+            background-color: #6390F0;
+        }
+
+        .type-electric {
+            background-color: #F7D02C;
+        }
+
+        .type-grass {
+            background-color: #7AC74C;
+        }
+
+        .type-ice {
+            background-color: #96D9D6;
+        }
+
+        .type-fighting {
+            background-color: #C22E28;
+        }
+
+        .type-poison {
+            background-color: #A33EA1;
+        }
+
+        .type-ground {
+            background-color: #E2BF65;
+        }
+
+        .type-flying {
+            background-color: #A98FF3;
+        }
+
+        .type-psychic {
+            background-color: #F95587;
+        }
+
+        .type-bug {
+            background-color: #A6B91A;
+        }
+
+        .type-rock {
+            background-color: #B6A136;
+        }
+
+        .type-ghost {
+            background-color: #735797;
+        }
+
+        .type-dragon {
+            background-color: #6F35FC;
+        }
+
+        .type-dark {
+            background-color: #705746;
+        }
+
+        .type-steel {
+            background-color: #B7B7CE;
+        }
+
+        .type-fairy {
+            background-color: #D685AD;
+        }
+
+        .btn-pokedex {
+            background-color: #3B4CCA;
+            /* Pokedex Blue */
+            color: white;
+        }
+
+        .btn-pokedex:hover {
+            background-color: #2A37A0;
+        }
+
+        .btn-pokedex-red {
+            background-color: #CC0000;
+            /* Pokedex Red */
+            color: white;
+        }
+
+        .btn-pokedex-red:hover {
+            background-color: #A30000;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="font-sans antialiased">
+    <header class="pokedex-header p-4 shadow-md">
+        <nav class="container mx-auto flex justify-between items-center">
+            <div>
+                <a href="{{ url_for('main.index') }}" class="text-3xl font-bold tracking-tight">
+                    Pokédex
+                </a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <form method="GET" action="{{ url_for('main.search_pokemon_route') }}" class="flex">
+                    {# Assuming search_form is passed globally or handled in a context processor #}
+                    {# Or include the form definition directly in routes passing to template #}
+                    <input type="text" name="search_term" placeholder="Search Pokémon..."
+                        class="px-3 py-2 rounded-l-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                        value="{{ request.args.get('search_term', '') }}">
+                    <button type="submit"
+                        class="px-4 py-2 bg-yellow-400 text-gray-800 rounded-r-md hover:bg-yellow-500 font-semibold">Search</button>
+                </form>
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('main.profile') }}" class="hover:text-yellow-300">{{ current_user.username }}'s
+                    Profile</a>
+                <a href="{{ url_for('auth.logout') }}" class="hover:text-yellow-300">Logout</a>
+                {% else %}
+                <a href="{{ url_for('auth.login') }}" class="hover:text-yellow-300">Login</a>
+                <a href="{{ url_for('auth.signup') }}" class="hover:text-yellow-300">Sign Up</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto mt-6 mb-6 p-4 min-h-screen">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="mb-4">
+            {% for category, message in messages %}
+            <div class="p-4 rounded-md
+                        {% if category == 'success' %} bg-green-100 border border-green-400 text-green-700
+                        {% elif category == 'danger' %} bg-red-100 border border-red-400 text-red-700
+                        {% elif category == 'info' %} bg-blue-100 border border-blue-400 text-blue-700
+                        {% elif category == 'warning' %} bg-yellow-100 border border-yellow-400 text-yellow-700
+                        {% else %} bg-gray-100 border border-gray-400 text-gray-700
+                        {% endif %}" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="pokedex-footer p-6 text-center">
+        <p>&copy; {{ current_year }} Pokedex App. Pokémon and Pokémon character names are trademarks of Nintendo.</p>
+        <p>Data sourced from <a href="https://pokeapi.co/" target="_blank" rel="noopener noreferrer"
+                class="text-yellow-400 hover:underline">PokeAPI</a>.</p>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

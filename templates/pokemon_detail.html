@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}{{ pokemon.name.capitalize() }} - Pokedex{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Custom styles for progress bars (stats) */
+    .stat-bar-container {
+        background-color: #e0e0e0;
+        /* Light grey background for the bar track */
+        border-radius: 0.5rem;
+        overflow: hidden;
+        height: 20px;
+        /* Adjust height as needed */
+        position: relative;
+    }
+
+    .stat-bar {
+        height: 100%;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        /* Text at the end of the bar */
+        padding-right: 8px;
+        /* Padding for text inside the bar */
+        font-size: 0.75rem;
+        /* Smaller font for stat value */
+        transition: width 0.5s ease-in-out;
+        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Colors for stat bars - can be more dynamic or specific */
+    .stat-hp {
+        background-color: #FF5959;
+    }
+
+    /* Reddish */
+    .stat-attack {
+        background-color: #F5AC78;
+    }
+
+    /* Orange */
+    .stat-defense {
+        background-color: #FAE078;
+    }
+
+    /* Yellowish */
+    .stat-sp_attack {
+        background-color: #9DB7F5;
+    }
+
+    /* Bluish */
+    .stat-sp_defense {
+        background-color: #A7DB8D;
+    }
+
+    /* Greenish */
+    .stat-speed {
+        background-color: #FA92B2;
+    }
+
+    /* Pinkish */
+
+    .pokemon-detail-card {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    .pokemon-image-bg {
+        background-image: url("data:image/svg+xml,%3Csvg width='50' height='50' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 50 L50 20 L80 50 L50 80 Z' fill='%23E2E8F0'/%3E%3C/svg%3E");
+        /* Placeholder subtle background */
+        background-size: 20px 20px;
+        background-repeat: repeat;
+        border: 4px solid white;
+        /* Corresponds to the example's thick white border */
+        box-shadow: 0 0 0 4px #3B4CCA;
+        /* And the blue outline outside the white */
+    }
+
+    .profile-section {
+        border: 1px solid #d1d5db;
+        /* gray-300 */
+        border-radius: 0.5rem;
+        /* rounded-lg */
+        padding: 1.5rem;
+        /* p-6 */
+        background-color: #ffffff;
+        /* bg-white */
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        /* shadow-md */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="pokemon-detail-card p-6 md:p-10 rounded-xl shadow-2xl">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+            <div>
+                <h1 class="text-5xl md:text-6xl font-bold text-gray-800">{{ pokemon.name.capitalize() }}</h1>
+                <p class="text-3xl text-gray-500 font-semibold">#{{ "%03d" | format(pokemon.id) }}</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <span class="type-badge type-{{ pokemon.type1.lower() }} text-lg px-4 py-2">{{ pokemon.type1 }}</span>
+                {% if pokemon.type2 %}
+                <span class="type-badge type-{{ pokemon.type2.lower() }} text-lg px-4 py-2 ml-2">{{ pokemon.type2
+                    }}</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="md:col-span-1 flex flex-col items-center">
+                {% if pokemon.sprite_url %}
+                <div class="pokemon-image-bg rounded-lg p-2 bg-gray-100 w-full max-w-xs md:max-w-sm">
+                    <img src="{{ pokemon.sprite_url }}" alt="{{ pokemon.name.capitalize() }}"
+                        class="mx-auto w-full h-auto object-contain drop-shadow-xl" style="min-height: 250px;">
+                </div>
+                {% else %}
+                <div class="pokemon-image-bg rounded-lg p-2 bg-gray-100 w-full max-w-xs md:max-w-sm flex items-center justify-center"
+                    style="min-height: 250px;">
+                    <span class="text-gray-500 text-xl">No Image Available</span>
+                </div>
+                {% endif %}
+
+                {% if current_user.is_authenticated %}
+                {% if is_caught %}
+                <form method="POST" action="{{ url_for('main.release_pokemon', pokemon_id=pokemon.id) }}"
+                    class="w-full mt-6">
+                    <button type="submit"
+                        class="w-full btn-pokedex-red font-bold py-3 px-4 rounded-lg text-lg shadow-md hover:shadow-lg transition-all duration-150 ease-in-out">
+                        Release Pokémon
+                    </button>
+                </form>
+                {% else %}
+                <form method="POST" action="{{ url_for('main.catch_pokemon', pokemon_id=pokemon.id) }}"
+                    class="w-full mt-6">
+                    <button type="submit"
+                        class="w-full btn-pokedex font-bold py-3 px-4 rounded-lg text-lg shadow-md hover:shadow-lg transition-all duration-150 ease-in-out">
+                        Catch Pokémon
+                    </button>
+                </form>
+                {% endif %}
+                {% else %}
+                <p class="mt-6 text-center text-gray-600 bg-gray-100 p-3 rounded-md">
+                    <a href="{{ url_for('auth.login', next=request.url) }}"
+                        class="text-blue-600 hover:underline font-semibold">Log in</a> or
+                    <a href="{{ url_for('auth.signup') }}" class="text-blue-600 hover:underline font-semibold">Sign
+                        up</a> to catch this Pokémon!
+                </p>
+                {% endif %}
+            </div>
+
+            <div class="md:col-span-2">
+                <div class="profile-section mb-8">
+                    <h2 class="text-2xl font-semibold text-gray-700 mb-3">Pokédex Entry</h2>
+                    <p class="text-gray-600 leading-relaxed">{{ pokemon.description | default('No description available
+                        for this Pokémon yet.') }}</p>
+                </div>
+
+                <div class="profile-section mb-8">
+                    <h2 class="text-2xl font-semibold text-gray-700 mb-4">Profile</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-gray-700">
+                        <div>
+                            <strong class="font-medium">Height:</strong>
+                            <span>{{ "%.1f" | format(pokemon.height / 10) if pokemon.height else 'N/A' }} m</span>
+                        </div>
+                        <div>
+                            <strong class="font-medium">Weight:</strong>
+                            <span>{{ "%.1f" | format(pokemon.weight / 10) if pokemon.weight else 'N/A' }} kg</span>
+                        </div>
+                        {# Add more profile data if available, e.g., Abilities, Gender Ratio, Egg Groups #}
+                        {# These would require more data from PokeAPI and model updates #}
+                        <div class="sm:col-span-2">
+                            <strong class="font-medium">Types:</strong>
+                            <span class="type-badge type-{{ pokemon.type1.lower() }}">{{ pokemon.type1 }}</span>
+                            {% if pokemon.type2 %}
+                            <span class="type-badge type-{{ pokemon.type2.lower() }} ml-1">{{ pokemon.type2 }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-section">
+                    <h2 class="text-2xl font-semibold text-gray-700 mb-4">Base Stats</h2>
+                    <div class="space-y-3">
+                        {% set stats = [
+                        ('HP', pokemon.hp, 'stat-hp'),
+                        ('Attack', pokemon.attack, 'stat-attack'),
+                        ('Defense', pokemon.defense, 'stat-defense'),
+                        ('Sp. Atk', pokemon.sp_attack, 'stat-sp_attack'),
+                        ('Sp. Def', pokemon.sp_defense, 'stat-sp_defense'),
+                        ('Speed', pokemon.speed, 'stat-speed')
+                        ] %}
+
+                        {% for name, value, color_class in stats %}
+                        {% if value is not none %}
+                        <div class="flex items-center">
+                            <span class="w-1/4 text-sm font-medium text-gray-600">{{ name }}: {{ value }}</span>
+                            <div class="w-3/4 stat-bar-container ml-2">
+                                <div class="stat-bar {{ color_class }}"
+                                    style="width: {{ (value / 255 * 100) | round | int }}%;">
+                                    {# {{ value }} #} {# Value can be inside bar or outside #}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-12 flex justify-between items-center border-t border-gray-300 pt-6">
+            {% if pokemon.id > 1 %}
+            <a href="{{ url_for('main.pokemon_detail', pokemon_id=pokemon.id - 1) }}"
+                class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                #{{ "%03d" | format(pokemon.id - 1) }}
+            </a>
+            {% else %}
+            <span></span> {# Placeholder for spacing if no previous #}
+            {% endif %}
+
+            <a href="{{ url_for('main.index') }}"
+                class="text-blue-600 hover:text-blue-800 border border-blue-600 hover:border-blue-800 px-4 py-2 rounded-md transition-colors">
+                Back to Pokédex
+            </a>
+
+            {# Assuming POKEMON_LIMIT is available or a max ID is known #}
+            {# You might need to pass POKEMON_LIMIT from seed.py or config to the template context #}
+            {% if pokemon.id < 151 %} {# Hardcoding 151 for now, make this dynamic based on your seed limit #} <a
+                href="{{ url_for('main.pokemon_detail', pokemon_id=pokemon.id + 1) }}"
+                class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+                #{{ "%03d" | format(pokemon.id + 1) }}
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-2" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                </a>
+                {% else %}
+                <span></span> {# Placeholder for spacing if no next #}
+                {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

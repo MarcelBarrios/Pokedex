@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }}'s Profile - Pokedex{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white p-6 rounded-lg shadow-xl mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">
+            {{ user.username }}'s Pokedex
+        </h1>
+        <p class="text-gray-600">Email: {{ user.email }}</p>
+        <p class="text-gray-600">Pokémon Caught: {{ caught_list.total }}</p>
+    </div>
+
+    <h2 class="text-2xl font-semibold text-gray-700 mb-6">My Caught Pokémon</h2>
+
+    {% if caught_list.items %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        {% for pokemon in caught_list.items %}
+        <a href="{{ url_for('main.pokemon_detail', pokemon_id=pokemon.id) }}"
+            class="pokemon-card block p-4 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 ease-in-out bg-white">
+            {% if pokemon.sprite_url %}
+            <img src="{{ pokemon.sprite_url }}" alt="{{ pokemon.name.capitalize() }}"
+                class="mx-auto h-32 w-32 object-contain">
+            {% else %}
+            <div class="mx-auto h-32 w-32 flex items-center justify-center bg-gray-200 rounded">
+                <span class="text-gray-500">No Image</span>
+            </div>
+            {% endif %}
+            <h2 class="text-xl font-semibold text-center mt-4 text-gray-800">{{ pokemon.name.capitalize() }}</h2>
+            <p class="text-sm text-gray-500 text-center">#{{ "%03d" | format(pokemon.id) }}</p>
+            <div class="mt-2 text-center">
+                <span class="type-badge type-{{ pokemon.type1.lower() }}">{{ pokemon.type1 }}</span>
+                {% if pokemon.type2 %}
+                <span class="type-badge type-{{ pokemon.type2.lower() }} ml-1">{{ pokemon.type2 }}</span>
+                {% endif %}
+            </div>
+            <form method="POST" action="{{ url_for('main.release_pokemon', pokemon_id=pokemon.id) }}"
+                class="mt-3 text-center">
+                <input type="submit" value="Release"
+                    class="btn-pokedex-red text-xs px-3 py-1 rounded hover:bg-red-700 transition-colors">
+            </form>
+        </a>
+        {% endfor %}
+    </div>
+
+    {% if caught_list.pages > 1 %}
+    <nav class="mt-10" aria-label="Caught Pokemon navigation">
+        <ul class="flex justify-center items-center -space-x-px">
+            {% if caught_list.has_prev %}
+            <li>
+                <a href="{{ url_for('main.profile', page=caught_list.prev_num) }}"
+                    class="py-2 px-3 ml-0 leading-tight text-gray-500 bg-white rounded-l-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700">Previous</a>
+            </li>
+            {% else %}
+            <li><span
+                    class="py-2 px-3 ml-0 leading-tight text-gray-300 bg-white rounded-l-lg border border-gray-300 cursor-not-allowed">Previous</span>
+            </li>
+            {% endif %}
+
+            {% for page_num in caught_list.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+            {% if page_num %}
+            {% if caught_list.page == page_num %}
+            <li><span aria-current="page" class="py-2 px-3 text-blue-600 bg-blue-50 border border-gray-300 z-10">{{
+                    page_num }}</span></li>
+            {% else %}
+            <li><a href="{{ url_for('main.profile', page=page_num) }}"
+                    class="py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700">{{
+                    page_num }}</a></li>
+            {% endif %}
+            {% else %}
+            <li><span class="py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300">...</span></li>
+            {% endif %}
+            {% endfor %}
+
+            {% if caught_list.has_next %}
+            <li>
+                <a href="{{ url_for('main.profile', page=caught_list.next_num) }}"
+                    class="py-2 px-3 leading-tight text-gray-500 bg-white rounded-r-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700">Next</a>
+            </li>
+            {% else %}
+            <li><span
+                    class="py-2 px-3 leading-tight text-gray-300 bg-white rounded-r-lg border border-gray-300 cursor-not-allowed">Next</span>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %} {% else %}
+    <p class="text-center text-gray-600 text-lg">You haven't caught any Pokémon yet. <a
+            href="{{ url_for('main.index') }}" class="text-blue-600 hover:underline">Start exploring!</a></p>
+    {% endif %}
+</div>
+{% endblock %}
